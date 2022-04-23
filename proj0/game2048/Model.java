@@ -106,31 +106,6 @@ public class Model extends Observable {
      *    value, then the leading two tiles in the direction of motion merge,
      *    and the trailing tile does not.
      * */
-
-    /** returns true if there exists an empty tile in the extreme "side" else false*/
-    public boolean move_extreme(int col, int row, Side side){
-        if (side == Side.NORTH){
-            if (board.tile(col, board.size() - 1) == null){
-                return true;
-            }
-            return false;
-        }
-        return false;
-    }
-
-    /** returns the relevant index of the tile closest to the side being moved to */
-    public int closest_adjacent(int c, int r, Side side){
-        if (side == Side.NORTH){
-            for (int row = r + 1; row < board.size(); row++){
-                if (board.tile(c, row) != null){
-                    return row;
-                }
-            }
-        }
-
-        return 1;
-    }
-
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
@@ -138,60 +113,6 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
-
-        board.setViewingPerspective(side);
-        side = Side.NORTH;
-        /** Implement move north */
-        for (int col = 0; col < board.size(); col ++){
-            boolean extreme_north = true;
-            int merge_count = 0;
-            boolean merged = false;
-            for (int row = board.size() - 2; row >= 0; row--){
-                Tile t = board.tile(col, row);
-                boolean flag = false;
-                if (t != null) {
-                    // check if extreme move to the north is possible
-                    if (extreme_north & move_extreme(col, row, side)) {
-                        board.move(col, board.size() - 1, t);
-                        changed = true;
-                        extreme_north = false;
-                        continue;
-                    }
-
-                    int closest_tile_row = closest_adjacent(col, row, side);
-                    if (t.value() == board.tile(col, closest_tile_row).value()) {
-                        if (!merged) {
-                            board.move(col, closest_tile_row, t);
-                            score += t.value() * 2;
-                            changed = true;
-                            merged = true;
-                            flag = true;
-                        } else {
-                            if (merge_count % 2 == 0) {
-                                board.move(col, closest_tile_row, t);
-                                score += t.value() * 2;
-                                changed = true;
-                                flag = true;
-                            } else {
-                                board.move(col, closest_tile_row - 1, t);
-                                changed = true;
-                                flag = true;
-                            }
-                        }
-                    }
-                    if (!flag) {
-                        board.move(col, closest_tile_row - 1, t);
-                        changed = true;
-                    }
-                    if (merged) {
-                        merge_count++;
-                    }
-                }
-            }
-//            }
-        }
-
-        board.setViewingPerspective(Side.NORTH);
 
         checkGameOver();
         if (changed) {
@@ -217,13 +138,6 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
-        for (int i = 0; i < b.size(); i++){
-            for (int j = 0; j < b.size(); j++){
-                if (b.tile(i, j) == null){
-                    return true;
-                }
-            }
-        }
         return false;
     }
 
@@ -233,16 +147,7 @@ public class Model extends Observable {
      * given a Tile object t, we get its value with t.value().
      */
     public static boolean maxTileExists(Board b) {
-        // TODO: Fill in this function
-        for (int i = 0; i < b.size(); i++){
-            for (int j = 0; j < b.size(); j++){
-                if (b.tile(i, j) != null){
-                    if (b.tile(i, j).value() == MAX_PIECE){
-                        return true;
-                    }
-                }
-            }
-        }
+        // TODO: Fill in this function.
         return false;
     }
 
@@ -252,64 +157,14 @@ public class Model extends Observable {
      * 1. There is at least one empty space on the board.
      * 2. There are two adjacent tiles with the same value.
      */
-
-    /** helper functions to check the 4 adjacent tiles */
-    public static boolean adjacent_north(Board b, int c, int r){
-        int row = r + 1;
-        if (row == b.size()){return false;}
-        if (b.tile(c, r).value() == b.tile(c, row).value()){
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean adjacent_south(Board b, int c, int r){
-        int row = r - 1;
-        if (row < 0){return false;}
-        if (b.tile(c, r).value() == b.tile(c, row).value()){
-            return true;
-        }
-
-        return false;
-    }
-
-    public static boolean adjacent_west(Board b, int c, int r){
-        int col = c - 1;
-        if (col < 0){return false;}
-        if (b.tile(c, r).value() == b.tile(col, r).value()){
-            return true;
-        }
-
-        return false;
-    }
-
-    public static boolean adjacent_east(Board b, int c, int r){
-        int col = c + 1;
-        if (col == b.size()){return false;}
-        if (b.tile(c, r).value() == b.tile(col, r).value()){
-            return true;
-        }
-
-        return false;
-    }
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
-        if (Model.emptySpaceExists(b)){return true;}
-
-        for (int col = 0; col < b.size(); col++){
-            for (int row = 0; row < b.size(); row++){
-                if (adjacent_north(b, col, row) || adjacent_south(b, col, row) || adjacent_east(b, col, row) || adjacent_west(b, col, row)){
-                    return true;
-                }
-            }
-        }
-
         return false;
     }
 
 
     @Override
-    /** Returns the model as a string, used for debugging. */
+     /** Returns the model as a string, used for debugging. */
     public String toString() {
         Formatter out = new Formatter();
         out.format("%n[%n");
